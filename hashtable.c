@@ -97,10 +97,11 @@ void ht_insert(Hashtable *ht, char *key, void *value) {
     ht->capacity *= 2;
     // copy contents into new bucket list, update key hashes and indices
     Node **buckets = (Node **)calloc(ht->capacity, sizeof(Node *));
-    for (size_t i = 0; i < ht->size; i++) {
+    for (size_t i = 0; i < ht->capacity / 2; i++) {
       Node *curr = ht->buckets[i];
-      while (curr != NULL) {
+      while (curr) {
         Node *next = curr->next;
+        curr->next = NULL;
         size_t tmp_hashed_key = hash(curr->entry->key);
         insert(ht, buckets, tmp_hashed_key % ht->capacity, curr);
         curr = next;
