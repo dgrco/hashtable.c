@@ -74,16 +74,17 @@ void insert(Hashtable *ht, Node **buckets, size_t index, Node *node) {
   }
 
   Node *curr = buckets[index];
-
-  while (curr->next != NULL) {
-    if (curr->entry->key == node->entry->key) {
+  Node *prev = NULL;
+  while (curr) {
+    if (strcmp(curr->entry->key, node->entry->key) == 0) {
       free(node->entry);
       free(node);
       return;
     }
+    prev = curr;
     curr = curr->next;
   }
-  curr->next = node;
+  prev->next = node;
 }
 
 void ht_insert(Hashtable *ht, char *key, void *value) {
@@ -163,5 +164,5 @@ void ht_print(Hashtable *ht) {
     }
     printf(",\n");
   }
-  printf("}");
+  printf("}\n");
 }
