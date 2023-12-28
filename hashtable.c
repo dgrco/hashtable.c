@@ -32,12 +32,17 @@ void ht_free(Hashtable *ht) {
   if (!ht)
     goto error;
 
-  for (size_t i = 0; i < ht->size; i++) {
+  for (size_t i = 0; i < ht->capacity; i++) {
     if (ht->buckets[i]) {
-      if (ht->buckets[i]->entry) {
-        free(ht->buckets[i]->entry);
+      Node *curr = ht->buckets[i];
+      while (curr) {
+        Node *next = curr->next;
+        if (curr->entry) {
+          free(curr->entry);
+        }
+        free(curr);
+        curr = next;
       }
-      free(ht->buckets[i]);
     }
   }
 
@@ -62,7 +67,6 @@ size_t hash(const char *key) {
 }
 
 void insert(Hashtable *ht, Node **buckets, size_t index, Node *node) {
-  node->next = NULL;
   if (!buckets[index]) {
     buckets[index] = node;
     ht->size++;
@@ -73,6 +77,8 @@ void insert(Hashtable *ht, Node **buckets, size_t index, Node *node) {
 
   while (curr->next != NULL) {
     if (curr->entry->key == node->entry->key) {
+      free(node->entry);
+      free(node);
       return;
     }
     curr = curr->next;
@@ -119,6 +125,7 @@ void ht_delete(Hashtable *ht, char *key) {
   while (curr) {
     if (curr->next && strcmp(curr->next->entry->key, key) == 0) {
       Node *next = curr->next->next;
+      free(curr->next->entry);
       free(curr->next);
       curr->next = next;
       return;
@@ -128,7 +135,7 @@ void ht_delete(Hashtable *ht, char *key) {
 }
 
 void *ht_get(Hashtable *ht, char *key) {
-  size_t hashed_key = hash(key); 
+  size_t hashed_key = hash(key);
   size_t index = hashed_key % ht->capacity;
   Node *curr = ht->buckets[index];
   while (curr) {
@@ -151,8 +158,7 @@ void ht_print(Hashtable *ht) {
            *(long *)ht->buckets[i]->entry->value);
     Node *curr = ht->buckets[i]->next;
     while (curr) {
-      printf("->{%s, %lu}", curr->entry->key,
-             *(long *)curr->entry->value);
+      printf("->{%s, %lu}", curr->entry->key, *(long *)curr->entry->value);
       curr = curr->next;
     }
     printf(",\n");
