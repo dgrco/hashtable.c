@@ -140,9 +140,10 @@ void *ht_get(Hashtable *ht, char *key) {
   size_t index = hashed_key % ht->capacity;
   Node *curr = ht->buckets[index];
   while (curr) {
-    if (curr->entry->key == key) {
+    if (strcmp(curr->entry->key, key) == 0) {
       return curr->entry->value;
     }
+    curr = curr->next;
   }
   return NULL;
 }
